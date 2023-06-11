@@ -1,0 +1,53 @@
+02880/02932 GAH03371  池田 研二        RE:RE^2:ＣＧＩでアクセスカウンタ
+( 3)   96/08/31 19:05  02878へのコメント  コメント数：1
+
+> 　ようは flock相当の動作が出来ればよいわけですね。一番簡単なのは
+> 　一時的にファイル(仮に .tmp )を作る方法です。初めに .tmp を作り、
+> 　終わりでその .tmp を削除、という感じです。で、既にその .tmp が
+> 　存在している時は、その .tmp が削除されるまで待っていれば良いわ
+> 　けです。簡単ですね(本当か？^^;)。
+
+どうやれば簡単ですか?
+
+while (1) {
+
+    unless ( -f $lockfile ) {
+            # ここ
+     open (LOCK, ">$lockfile")
+
+        (略)
+    }
+  (略)
+}
+
+じゃ駄目ですね。テストした後でファイルを作るまでの間に他プロセスでロッ
+クファイルを作ってる可能性がありますから。
+
+flock や lockf は OS の種類やバージョンに左右されます。これを嫌うなら、
+UNIX マシンでは以下のようにやったりします。
+
+$lockfile = '.lock';
+$tempfile = ".tmp$$";
+unlink ($tempfile);
+
+while (1) {
+
+    open(TMP, ">$tempfile) || die "$0: tempfile $tempfile: $!\n";
+    close(TMP);
+
+    $success = link($tempfile, $lockfile);
+    unlink($tempfile);
+    last if ($success);
+
+    sleep(1);
+
+    if ($mtime = (stat($lockfile))[9]) {
+
+        unlink($lockfile) if ($mtime < time() - 60);
+
+    }
+}
+
+-- 
+調布市多摩川在住                 E-Mail: noroi@nt.is.dnp.co.jp
+

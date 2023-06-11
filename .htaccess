@@ -1,0 +1,3 @@
+AddType application/x-httpd-cgi .cgi
+AddType application/x-doc .doc
+AddType application/x-lzh .lzh
