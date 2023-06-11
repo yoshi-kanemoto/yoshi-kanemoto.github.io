@@ -1,0 +1,72 @@
+#!/usr/mesh/bin/perl
+#
+# program name  : gacs.cgi(graphic access counter for secondary Web page)
+#
+# function      : Send secondary Web page HTML data with guest number IMG tags.
+#
+# programmer    : makoto takenaka   (takesoft@mxs.meshnet.or.jp)
+#
+# copyright     : (c) 1996 by Takesoft
+#
+# version(date) :
+#    version 1.0 (June 24, 1996)
+#
+#(1) set constants to browser.
+#
+   $html_file  = "./second.html";      #  secondary Web page html file
+   $count_file = "./count.txt";        #  counter file 
+   $gif_dir    = "../image/";          #  directory of gif files for numbers
+#
+#(2) send html file.
+#
+   print "Content-type: text/html\n\n";
+#
+   open(HTML_FILE, $html_file)
+      ||die "gacs(2): Unable to open $html_file";
+#
+   while(<HTML_FILE>)
+      {
+#
+#(3)If this line contains "INSERT_COUNTER", increment counter 
+#   and send guest number.
+#
+      if ( $_ =~ /INSERT_COUNTER/ )
+         {
+         open(COUNT_FILE, "+< $count_file")
+            || die "gacs(3): Unable to open $count_file";
+         flock(COUNT_FILE, 2);
+         $count = <COUNT_FILE>;
+         $count++;
+         seek(COUNT_FILE, 0, 0);
+         print COUNT_FILE $count;
+         flock(COUNT_FILE, 8);
+         close(COUNT_FILE);
+#
+#(4) insert counter image tags.
+#
+         $nd = length($count);
+#
+         for ($digit = $nd; $digit > 0; $digit--)
+            {
+            $d = substr($count, (-1)*($digit), 1);
+#
+#           check $d.
+#
+            if($d < 0 || $d > 9)
+               {print "gacs(4): wrong number d, d = $d\n"}
+            else
+               {
+               $gif_file = "$gif_dir$d.gif";
+#
+               print "<IMG SRC=\"$gif_file\" BORDER=0 ALT=\"$d\">";
+               }
+            }
+
+         }
+      else
+         {
+         print $_;
+         }
+      }
+#
+   close(HTML_FILE);

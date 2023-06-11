@@ -1,0 +1,112 @@
+#!/usr/mesh/bin/perl
+#
+# program name : gacf (graphic access counter for first Web page)
+#
+# function     : count the number of guest, rewrite "index.html" 
+#                and send a dummy gif file.
+#
+# note         : this counter is made for mesh home page (first page), 
+#                where CGI is available, but SSI is not.
+#
+# programmer   : makoto takenaka : takesoft@mxs.meshnet.or.jp
+#
+# copyright    : (C) 1996 by Takesoft
+#
+# version(date): version  1. 0(June 22, 1996)
+#                version  1. 1(June 26, 1996)
+#                   mail address is changed and commented.
+#
+#(1) set constants.
+#
+   $html_file0     = "./index_.html";     # prototype html file
+   $html_file      = "./index.html";      # output html file with guest number
+   $count_file     = "./count.txt";       # guest number file
+   $gif_dir        = "./image/";          # directory of digit gif files
+   $dummy_gif_file = "./image/trans.gif"; # dummy gif file
+#
+#(2) Increment $count.
+#
+         open(COUNT_FILE, "+< $count_file")
+            || &error_mail("gacf: Unable to open $count_file");
+         flock(COUNT_FILE, 2);
+         $count = <COUNT_FILE>;
+         $count++;
+         seek(COUNT_FILE, 0, 0);
+         print COUNT_FILE $count;
+         flock(COUNT_FILE, 8);
+         close(COUNT_FILE);
+#
+#(3) Copy $html_file0 to $html_file, but insert guest number.
+#
+   open(HTML_FILE, ">$html_file")
+      ||&error_mail("gacf: Unable to open $html_file. ");
+   flock(HTML_FILE, 2);
+   open(HTML_FILE0, "$html_file0")
+      ||&error_mail("gacf: Unable to open $html_file0.");
+
+#
+   while(<HTML_FILE0>)
+      {
+#
+#  If this line contains "INSERT_COUNTER", send guest number.
+#
+      if ( $_ =~ /INSERT_COUNTER/ )
+         {
+#
+#(4) insert counter image tags.
+#
+         $nd = length($count);
+#
+         for ($digit = $nd; $digit > 0; $digit--)
+            {
+            $d = substr($count, (-1)*($digit), 1);
+#
+#           if($d < 0 || $d > 9)
+#              {&error_mail("(4) wrong number d, d = $d")}
+#
+            $gif_file = "$gif_dir$d.gif";
+
+            print HTML_FILE "<IMG SRC=\"$gif_file\" BORDER=0 ALT=\"$d\">";
+            }
+         }
+      else
+         {
+         print HTML_FILE $_;
+         }
+      }
+#
+   flock(HTML_FILE, 8);
+   close(HTML_FILE);
+   close(HTML_FILE0);
+#
+#(5) send dummy gif file to browser.
+#
+   print "Content-type: image/gif\n\n";
+#
+   open(GIF_FILE, $dummy_gif_file)
+      ||&error_mail("gacf: Unable to open $dummy_gif_file");
+#
+   while(read(GIF_FILE, $buf, 16384))
+      {
+      print $buf;
+      }
+   close(GIF_FILE);
+#
+sub error_mail
+   {
+   local($message) = @_;
+#
+#(sub routine) Send error mail.
+#
+#   If you want to use error mail, change mail address to yours
+#   and uncomment(remove #) next four lines.
+#
+#  open(MAIL, "|mail user_id@xxx.yyyyyyy.or.jp");
+#  print MAIL "Error Message from gacf.cgi of home page: \n";
+#  print MAIL "$message\n";
+#  close(MAIL);
+#
+#  stop this perl program.
+#
+   die;
+   }

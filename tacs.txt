@@ -1,0 +1,56 @@
+#!/usr/mesh/bin/perl
+#
+# program name  : tacs.cgi(text-type access counter for secondary Web page)
+#
+# function      : show Web page with guest number
+#
+# programmer    : makoto takenaka   (takesoft@mxs.meshnet.or.jp)
+#
+# copyright     : (c) 1996 by Takesoft
+#
+# version(date) :
+#    version 1.0 (June 18, 1996)
+#        Insert guest number just after BODY tag.
+#    version 1.1 (June 19, 1996)delete since date
+#    version 1.2 (June 21, 1996)
+#        Name has changed from tcounter to tacs.
+#        Replace "INSERT_COUNTER" line with guest number. 
+#
+#(1) set constants.
+#
+   $html_file  = "second.html"; #  Web page html file
+#
+   $count_file = "count.txt";   #  Counter file 
+#
+#(2) send html file.
+#
+   print "Content-type: text/html\n\n";
+#
+   open(HTML_FILE, $html_file)||die "Unable to open $html_file";
+#
+   while(<HTML_FILE>)
+      {
+#
+#(3)If this line contains "INSERT_COUNTER", increment counter 
+#   and send guest number.
+#
+      if ( $_ =~ /INSERT_COUNTER/ )
+         {
+         open(COUNT_FILE, "+< $count_file")
+            || die "Unable to open $count_file";
+         flock(COUNT_FILE, 2);
+         $count = <COUNT_FILE>;
+         $count++;
+         seek(COUNT_FILE, 0, 0);
+         print COUNT_FILE $count;
+         flock(COUNT_FILE, 8);
+         close(COUNT_FILE);
+         print $count;
+         }
+      else
+         {
+         print $_;
+         }
+      }
+#
+   close(HTML_FILE);
