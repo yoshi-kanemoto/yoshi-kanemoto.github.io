@@ -1,0 +1,55 @@
+BODY	{					
+	background-color:#ffffff;			
+	}
+A:link	{
+  color:#0000ff;
+	}
+A:visited	{	
+  color:#9900cc;
+	}
+A:active	{
+  color:#ff0000;
+	}
+h1 {
+  text-align: center;
+  font-size: 2em;
+  color: #FF0099;
+  background-color: #66FFCC;
+  margin-top: 1.5em;
+}
+h2 { 
+border-color: green; 
+border-top-width: 2px; 
+border-bottom-width: 5px;
+border-left-width: 1px; 
+border-right-width: 1px; 
+margin-top: 1.5em;
+}
+table { 
+border-style:double;
+ }
+th   { 
+ font-size:14pt; 
+ background:#ffff00; 
+ text-align: center;
+}
+td.ko     { 
+ font-size:14pt; 
+ background:#7fffd4; 
+ text-align: center;
+}
+td.ka     { 
+ font-size:14pt; 
+ background:#ffffde; 
+ text-align: center;
+}
+td.bl     { 
+ font-size:14pt; 
+ background:#ceeced; 
+ text-align: center;
+}
+td.pi     { 
+ font-size:14pt; 
+ background:#f7d7fe; 
+ text-align: center;
+}
