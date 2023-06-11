@@ -1,0 +1,153 @@
+<HTML>
+<HEAD>
+<TITLE>ネットサーフレスキュー[Ｗｅｂ裏技|チャレンジＣＧＩ|ＣＧＩでアクセスカウント]</TITLE>
+</HEAD>
+
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="#229955" VLINK="#999933" ALINK="#FF0000">
+
+<A HREF="../web/"> [Ｗｅｂ裏技へ]</A>
+<A HREF="../web2/"> [ひとつ前にもどる]</A>
+
+
+
+
+<H1>ＣＧＩでアクセスカウント</H1>
+
+last update at Friday, 28-Jun-96 23:24:25 JST<BR>
+
+<HR><p>
+メッシュネットをはじめとするＷＥＢサーバでは、ＣＧＩは開放していてもＳＳＩは禁止しています。
+これを使えば、アクセスカウンタをＨＴＭＬに貼り付けたり、アクセス解析用のログをとったり、応用は様々です。
+<OL>
+<LI><h3>基礎知識と方法</h3>
+  <ul>
+  <li>ＨＴＭＬはその拡張子（.htmや.html）やＭＩＭＥ形式のヘッダによって、サーバ側もブラウザ側もそれがＨＴＭＬであることを認識して
+タグを処理して表示するわけです。
+  <li>ＣＧＩでＨＴＭＬを出力する場合は、これをスクリプト内に書いてやることで、ブラウザ側でも
+タグを処理して、同じように表示するようにできます。
+  <li>ＣＧＩで表示されるわけですから、ＨＴＭＬを出力すると同時にいろいろな処理をさせることが
+できます。
+  <li><b>ここではアクセスカウント機能を入れた方法を紹介します。</b>
+  <li>しかし、例えば「.../~rescue/」というＵＲＬでは「index.html」を読み込むわけです。
+ということは、ホームページの名前を「index.cgi」に変えなければならず、いままで「.../~rescue/」で
+リンク（公開）している方は「.../~rescue/index.cgi」にするなど面倒だと思います。そこで、
+殆どの方が使っていると思われるネットスケープの、フレーム機能を使って擬似的に「index.html」を
+表現させる方法をとってみました。
+</ul><p>
+
+<LI><h3>準備</h3>
+<pre>
+index.html -------&gt; フレームを使って擬似的に処理（いままで通りここにリンクする）
+index.txt --------&gt; ここにはいままで「index.html」に書いていた内容
+index.cgi --------&gt; 「index.txt」を読み込んでＨＴＭＬを出力するＣＧＩスクリプト
+index.count ------&gt; アクセスカウント数を入れるファイル（あらかじめ数字を入れておきます）
+</pre><p>
+
+<h3>index.html</h3>
+<blockquote>
+<pre>
+&lt;html&gt;&lt;head&gt;&lt;title&gt;
+＊＊のホームページ
+&lt;/title&gt;&lt;/head&gt;
+&lt;frameset rows="100%,*"&gt;
+&lt;frame src="index.cgi"&gt;
+&lt;/frameset&gt;
+&lt;noframes&gt;
+&lt;body&gt;
+&lt;a href="index.cgi"&gt;こちらから入ってください。&lt;/a&gt;&lt;p&gt;
+&lt;/body&gt;
+&lt;noframes&gt;
+&lt;/html&gt;
+</pre>
+</blockquote>
+
+<h3>index.txt</h3>
+<blockquote>
+<pre>
+&lt;html&gt;&lt;head&gt;&lt;title&gt;
+＊＊のホームページ
+&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;h1&gt;ようこそ＊＊のホームページへ&lt;/h1&gt;
+このページには&lt;!--count--&gt;のアクセスがありました。&lt;p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+</blockquote>
+
+
+
+<h3>index.cgi</h3>
+<blockquote>
+<pre>
+#!/usr/local/bin/perl
+# ↑このパスはあなたの環境に合わせて設定すること
+
+# HTMLのファイル名を指定する
+
+  $html = "index.txt";
+
+# アクセスカウント数を入れるファイルを指定する
+# 最初はあらかじめ「0」を必ず入れておくこと
+# HTMLにはカウンタ表示する場所に以下の文字列を書いておくこと
+#
+#   このページには&lt;!--count--&gt;のアクセスがありました。
+
+  $count_file = "index.count";
+
+
+# HTMLを読み込んで配列に代入
+  open(IN,"$html") || die "error\n";
+  @lines = &lt;IN&gt;;
+  close(IN);
+
+# 今までのカウンタ数を読み込んで変数に代入
+  open(DATA,"$count_file") || die "error\n";
+  while(&lt;DATA&gt;){ $count = $_; }
+  close(DATA);
+
+# ＷＷＷに出力
+  print "Content-type: text/html\n\n";
+  foreach $line (@lines) {
+    $line =~ s/&lt;!--count--&gt;/$count/g; # アクセスカウント数を入れ込む
+    print "$line";
+  }
+
+# アクセスカウント処理
+  $count++;
+  open(OUT,"&gt;$count_file") || die "error\n";
+  print OUT "$count";
+  close(OUT);
+</pre>
+</blockquote>
+
+<h3>index.count（カウント開始したい数字）</h3>
+<blockquote>
+<pre>
+0
+</pre>
+</blockquote>
+
+
+
+<p>
+
+<LI><h3>注意</h3>
+<ul>
+<li>ＨＴＭＬはバイナリモードでもアスキーモードでもいいのですが、ここでは「index.txt」は
+テキストファイルとして扱っていますので、アスキーモードで処理します。
+<li>ページの内容に&lt;!--count--&gt;を書くことで、その場所にカウントされた数字が挿入されます。
+<li><b>パーミッションの設定も忘れずに。「index.cgi」は７０５、「index.count」は６０６、その他は
+６０４です。</b>
+</ul><p>
+
+
+</ol>
+
+<HR>
+<I><A HREF="../cgi-bin/mail.htm">rescue@sainet.or.jp</A></I><p>
+
+
+</BODY>
+</HTML>
